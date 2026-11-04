@@ -77,3 +77,28 @@ Dataset: 5 real offers + 3 synthetic ones, each synthetic isolating ONE dealbrea
 - In v1 the C1 requirement landed in `alertas` instead of driving the classification.
 
 Next: eval script with a metric, repeated runs to measure variance, prompt fixes, label semantics.
+
+## Decision: what counts as a hit (eval semantics v1, owner's decision)
+The owner fears missing a good offer if the system is too deterministic, so the error costs
+are asymmetric and the metric follows that. To be refined over time.
+
+| Human label | Model says | Counts as |
+|---|---|---|
+| si / quizas | compatible or requiere_verificacion | hit |
+| si / quizas | descartada | MISS (critical, target: zero) |
+| no | descartada | hit |
+| no | requiere_verificacion | tolerated, adds review load |
+| no | compatible | false positive |
+
+Two numbers are tracked together: (1) good offers discarded (should be 0) and
+(2) review load = share of offers left as requiere_verificacion (counterweight: if everything
+is "verify", the system just hands the work back).
+
+## Working process (why this is useful for the job search itself)
+1. Describe the profile and the criteria in plain text, separate from the code.
+2. Collect real offers and label them BEFORE running the model (human ground truth).
+3. Add synthetic offers that isolate ONE dealbreaker to test one rule at a time.
+4. Run, compare with the labels, and change one thing at a time (profile or prompt).
+5. Keep the previous version (e.g. `profile.v1.md`) so every change can be measured.
+6. Write each decision and finding in this file so the project survives a machine change.
+This loop (label -> run -> measure -> adjust) is the same one used to evaluate agents in production.
