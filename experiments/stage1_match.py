@@ -10,7 +10,8 @@ sys.stdout.reconfigure(encoding="utf-8")  # fix Windows console accents
 load_dotenv()
 
 ROOT = Path(__file__).resolve().parent.parent
-PROFILE = (ROOT / "data/private/profile.md").read_text(encoding="utf-8")
+PROFILE_PATH = ROOT / (sys.argv[1] if len(sys.argv) > 1 else "data/private/profile.md")
+PROFILE = PROFILE_PATH.read_text(encoding="utf-8")
 MODEL = "claude-haiku-5-5"
 
 SYSTEM = f"""Sos un asistente que evalua si una oferta de trabajo es compatible con el perfil de una candidata.
@@ -40,6 +41,7 @@ def parse_json(text: str) -> dict:
     return json.loads(text[text.index("{") : text.rindex("}") + 1])
 
 client = Anthropic(timeout=60, max_retries=1)
+summary = {}
 
 for path in sorted((ROOT / "data/private/jobs").glob("[0-9]*.md")):
     resp = client.messages.create(
@@ -53,7 +55,17 @@ for path in sorted((ROOT / "data/private/jobs").glob("[0-9]*.md")):
         print("ERROR: stop_reason =", resp.stop_reason, "(respuesta incompleta, se descarta)")
         continue
     try:
-        print(json.dumps(parse_json(text_of(resp)), indent=2, ensure_ascii=False))
+        result = parse_json(text_of(resp))
+        summary[path.name] = result
+        print(json.dumps(result, indent=2, ensure_ascii=False))
     except ValueError as e:
         print("ERROR: no es JSON valido:", e)
     print(f"tokens in/out: {resp.usage.input_tokens}/{resp.usage.output_tokens}")
+
+print()
+print("=== RESUMEN", PROFILE_PATH.name, "===")
+for name, r in summary.items():
+    print(f"{name}: {r.get('clasificacion')} | score {r.get('score')}")
+out = ROOT / "logs"
+out.mkdir(exist_ok=True)
+(out / f"run_{PROFILE_PATH.stem}.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")

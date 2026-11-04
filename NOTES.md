@@ -58,3 +58,22 @@ Minimum showable: stages 0-2 with evaluation.
 5. Add a separate set of malicious offers (prompt injection) and measure resistance.
 6. Move deterministic checks (e.g. salary floor, on-site) out of the LLM into code.
 7. Later: prompt caching for the repeated profile.
+
+## First measurement (8 offers, profile v1 vs v2)
+Dataset: 5 real offers + 3 synthetic ones, each synthetic isolating ONE dealbreaker
+(on-site, hybrid in another city, C1 English). Labels: 2 yes, 1 maybe, 5 no.
+`stage1_match.py` takes the profile path as an argument and writes `logs/run_<profile>.json`.
+
+| Result | v1 (without new rules) | v2 (with city + C1 English rules) |
+|---|---|---|
+| "no" offers discarded | 4/5 (08 slipped through) | 5/5 |
+
+- The C1 English rule fixed offer 08. The city rule changed nothing measurable: the
+  hybrid offer was already discarded because the profile said "no on-site work".
+- Caveats: one run each, and outputs are not deterministic, so this is not causal proof.
+  The synthetic offers are easy (they state everything explicitly).
+- The model never answers "compatible": missing info always yields "requiere_verificacion".
+  The score does not order offers like the human does (a "yes" got 5, a "maybe" got 7).
+- In v1 the C1 requirement landed in `alertas` instead of driving the classification.
+
+Next: eval script with a metric, repeated runs to measure variance, prompt fixes, label semantics.

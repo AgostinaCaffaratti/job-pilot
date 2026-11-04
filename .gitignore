@@ -15,3 +15,6 @@ __pycache__/
 .ruff_cache/
 data/private/
 logs/
+
+# Local run outputs (analysis of private offers)
+logs_*.txt
