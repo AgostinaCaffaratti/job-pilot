@@ -1,6 +1,6 @@
 """Stage 1: score saved matcher runs against the human labels. Pure code, no API calls.
 
-Usage: uv run --no-sync python experiments/stage1_eval.py logs/run_profile.json [more runs...]
+Usage: uv run python experiments/stage1_eval.py [logs/run_X.json ...]   (no args = every run in logs/)
 
 Semantics (see NOTES.md, "eval semantics v1"):
   si / quizas  + compatible|requiere_verificacion -> hit
@@ -10,6 +10,7 @@ Semantics (see NOTES.md, "eval semantics v1"):
   no           + compatible                       -> FALSE POSITIVE
 """
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -63,7 +64,28 @@ def evaluate(run_path: Path) -> None:
     print(f"Falsos positivos:           {len(false_pos)}")
 
 
-if len(sys.argv) < 2:
-    sys.exit("usage: stage1_eval.py <run.json> [<run.json> ...]")
-for arg in sys.argv[1:]:
-    evaluate(ROOT / arg)
+runs = [ROOT / a for a in sys.argv[1:]] or sorted((ROOT / "logs").glob("run_*.json"))
+if not runs:
+    sys.exit("No runs found. Run stage1_match.py first (it writes logs/run_*.json).")
+for run in runs:
+    evaluate(run)
+
+
+def stability(runs: list[Path]) -> None:
+    """Group runs of the same profile (run_<profile>[_rN].json) and flag offers whose answer changes."""
+    groups: dict[str, list[dict]] = {}
+    for run in runs:
+        stem = re.match(r"run_(.+?)(?:_r\d+)?\.json$", run.name).group(1)
+        groups.setdefault(stem, []).append(json.loads(run.read_text(encoding="utf-8")))
+    for stem, group in groups.items():
+        if len(group) < 2:
+            continue
+        print(f"\n=== STABILITY: profile '{stem}' over {len(group)} runs ===")
+        for name in sorted(group[0]):
+            answers = [g[name]["clasificacion"] for g in group if name in g]
+            scores = [g[name]["score"] for g in group if name in g]
+            flag = "STABLE" if len(set(answers)) == 1 else "UNSTABLE"
+            print(f"{name:8}{flag:10}{', '.join(answers)}  | scores {scores}")
+
+
+stability(runs)

@@ -115,3 +115,13 @@ This loop (label -> run -> measure -> adjust) is the same one used to evaluate a
 3. **UI** with color indicators (belongs to stages 3 and 5, after the matcher is measured).
 Rationale for order: measure the base matcher first (eval script), then add dimensions one at
 a time so every change can be compared against the previous version.
+
+## Variance check (profile v2, 4 runs of the same 8 offers)
+- Good offers discarded: 0 of 3 in every run (metric 1 is stable). Review load: 3-4 of 8.
+- 7 of 8 offers always got the same class; scores moved at most +-1.
+- Offer 07 (hybrid in Buenos Aires) flipped between descartada and requiere_verificacion.
+  Cause: the profile says "I cannot attend offices outside my city of residence" but, for
+  privacy, no longer names the city, so the model cannot know if Buenos Aires is her city.
+  Lesson: instability here comes from an under-specified profile, not only from model randomness.
+- Tooling: `stage1_match.py <profile> [tag]` saves `logs/run_<profile>_<tag>.json`;
+  `stage1_eval.py` (no args) scores every run and prints a STABILITY section.

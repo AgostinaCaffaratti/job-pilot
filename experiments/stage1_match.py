@@ -68,4 +68,4 @@ for name, r in summary.items():
     print(f"{name}: {r.get('clasificacion')} | score {r.get('score')}")
 out = ROOT / "logs"
 out.mkdir(exist_ok=True)
-(out / f"run_{PROFILE_PATH.stem}.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+(out / f"run_{PROFILE_PATH.stem}{'_' + sys.argv[2] if len(sys.argv) > 2 else ''}.json").write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
