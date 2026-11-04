@@ -102,3 +102,16 @@ is "verify", the system just hands the work back).
 5. Keep the previous version (e.g. `profile.v1.md`) so every change can be measured.
 6. Write each decision and finding in this file so the project survives a machine change.
 This loop (label -> run -> measure -> adjust) is the same one used to evaluate agents in production.
+
+## Ideas backlog (owner's ideas, not built yet)
+1. **Hard filters vs soft signals.** Salary should not be a dealbreaker; it should be a graded
+   signal (fit range, shown with colors in the UI, grey when unknown) so a lower-paid offer that
+   teaches something can still be picked. Hard filters stay: on-site, impossible requirements, fraud.
+   Salary math belongs in code; the LLM only extracts the numbers from the text.
+   (Implies a new profile version: move salary from "dealbreakers" to "soft preferences".)
+2. **Freelance offers.** Profile already accepts 10-20 h/week. Needs: rate normalization
+   (hourly / per project / monthly) with a minimum hourly rate decided by the owner, extra
+   criteria (duration, clear scope, payment terms) and extra fraud checks.
+3. **UI** with color indicators (belongs to stages 3 and 5, after the matcher is measured).
+Rationale for order: measure the base matcher first (eval script), then add dimensions one at
+a time so every change can be compared against the previous version.
