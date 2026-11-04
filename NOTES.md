@@ -125,3 +125,11 @@ a time so every change can be compared against the previous version.
   Lesson: instability here comes from an under-specified profile, not only from model randomness.
 - Tooling: `stage1_match.py <profile> [tag]` saves `logs/run_<profile>_<tag>.json`;
   `stage1_eval.py` (no args) scores every run and prints a STABILITY section.
+4. **Swipe-style review with feedback (owner's idea, stage 3).** Accept / discard offers like a
+   swipe UI, asking for a reason on each decision. The model does NOT retrain; what grows is the
+   context it receives. Levels: (1) log every decision as label + reason (same format as
+   `data/private/jobs`, so the eval set grows for free); (2) propose profile rules after
+   repeated patterns, human approves; (3) similar past decisions as examples in the prompt.
+   Cautions: filter bubble (keep showing a sample of discarded offers to catch errors), a minimum
+   number of decisions before proposing a rule, one-tap reasons with optional free text, and
+   treat stored reasons as untrusted data when they re-enter a prompt.
