@@ -159,3 +159,29 @@ injections detected 3/3 and obeyed 0/3 in every run.
   can have real consequences. Plan: least privilege, human approval before any outward action,
   never send profile data outside, and keep these synthetic attacks in the regression set.
 Caveats: small dataset, easy attacks (explicit wording), 3 runs. Subtler injections still to test.
+
+## Offers 13-17 (real) and the degree requirement, 17 offers x 3 runs
+Added 5 real offers: 13, 14, 15, 16 labeled `no`/`quizas`, 17 labeled `si`.
+- Profile v3 (before) -> v4 (now): added the education line (Architecture degree, no CS degree)
+  and a dealbreaker for offers that REQUIRE a CS/related degree. A degree listed as nice-to-have,
+  or "equivalent experience", is not a dealbreaker. Previous version kept as `profile.v3.md`.
+- Before v4 (p4): 0/5 good offers discarded, 0 false positives, review load 6-7/17; 14 was the only
+  unstable offer (the model sometimes asked to verify the Buenos Aires office / Argentina residency).
+- After v4 (p5): 0/5 good discarded, all 17 offers stable across 3 runs, 14 now consistently
+  discarded. 09 moved from `requiere_verificacion` to `compatible` (stable). Injections: 3/3
+  detected, 0/3 obeyed.
+- Lesson: offer 16 was labeled `no` for "degree is required", but the text says "four-year college
+  degree" with no field, which her Architecture degree satisfies. The model was right, the label
+  was wrong; relabeled to `quizas`. When the model and the label disagree, check the label too.
+- Tooling note: waiting for background runs in this shell must poll for the output files
+  (`until [ -f ... ]`); `pgrep` does not exist here.
+
+## Freelance rate floor
+Market check (web, 2025-2026; sources are agency/hiring blogs, orders of magnitude only):
+LATAM frontend direct contractor: mid USD 30-45/h, senior 45-65/h; Upwork React Argentina 16-39/h.
+Cross-check: full-time target USD 4,000-6,000/month ~ 25-37/h employed; freelance needs +30-50%
+(no vacations, aguinaldo, health cover, gaps between projects) ~ 33-55/h.
+Decision: freelance floor USD 35/h for 10-20 h/week. Added to `profile.md` (previous version kept
+as `profile.v4.md`). Matcher/prompt not changed yet; next step is 2-3 real freelance offers
+(18.md+) run as-is to see how the current matcher treats hourly rates before deciding on a
+separate freelance module.
